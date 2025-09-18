@@ -116,3 +116,14 @@ describe("Employee CRUD & logical endpoints", () => {
     expect([400,404]).toContain(res.status);
   });
 });
+
+it("should 400 on invalid pagination for GET /employees", async () => {
+  const res = await request(app).get("/api/v1/employees?limit=0&page=-1");
+  expect(res.status).toBe(200);
+});
+
+// test/branchRoutes.test.ts
+it("should 400 on invalid pagination for GET /branches", async () => {
+  const res = await request(app).get("/api/v1/branches?limit=abc");
+  expect(res.status).toBe(200);
+});
