@@ -1,3 +1,15 @@
+
+export {
+  create as createEmployee,
+  list as getEmployees,
+  get as getEmployeeById,
+  update as updateEmployee,
+  remove as deleteEmployee,
+};
+
+
+
+
 import { Request, Response } from "express";
 import * as svc from "../services/employee.service";
 import { Employee, EmployeeCreateDTO, EmployeeUpdateDTO } from "../models/employee";
@@ -75,11 +87,4 @@ export function listByDepartment(req: Request, res: Response) {
   return listOk(res, employees, "Employees by department", employees.length);
 }
 
-/** ✅ Aliases to match your routes */
-export {
-  create as createEmployee,
-  list as getEmployees,
-  get as getEmployeeById,
-  update as updateEmployee,
-  remove as deleteEmployee,
-};
+
