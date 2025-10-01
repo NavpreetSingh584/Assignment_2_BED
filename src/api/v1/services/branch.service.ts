@@ -1,34 +1,46 @@
-import { branches } from "../../../data/branches";
-import type { Branch } from "../models/branch";
+import { Branch, BranchCreateDTO, BranchUpdateDTO } from "../models/branch";
+import * as repo from "../repositories/firestore.repository";
 
-export function list(): Branch[] {
-  return branches;
-}
+const COLLECTION = "branches";
 
-export function getById(id: number): Branch | undefined {
-  return branches.find(b => b.id === id);
-}
+export const create = async (dto: BranchCreateDTO): Promise<Branch> => {
+  try {
+    return await repo.createDocument<Branch>(COLLECTION, dto as any);
+  } catch (e:any) {
+    throw new Error("DB create failed: " + (e?.message ?? e));
+  }
+};
 
-export function create(payload: Omit<Branch, "id">): Branch {
-  const nextId = Math.max(0, ...branches.map(b => b.id)) + 1;
-  const branch: Branch = { id: nextId, ...payload };
-  branches.push(branch);
-  return branch;
-}
+export const list = async (): Promise<Branch[]> => {
+  try {
+    return await repo.getDocuments<Branch>(COLLECTION);
+  } catch (e:any) {
+    throw new Error("DB read failed: " + (e?.message ?? e));
+  }
+};
 
-export function update(
-  id: number,
-  patch: Partial<Omit<Branch, "id">>
-): Branch | undefined {
-  const idx = branches.findIndex(b => b.id === id);
-  if (idx === -1) return undefined;
-  branches[idx] = { ...branches[idx], ...patch, id };
-  return branches[idx];
-}
+export const getById = async (id: number | string): Promise<Branch | undefined> => {
+  try {
+    const doc = await repo.getDocumentById<Branch>(COLLECTION, String(id));
+    return doc ?? undefined;
+  } catch (e:any) {
+    throw new Error("DB read failed: " + (e?.message ?? e));
+  }
+};
 
-export function remove(id: number): boolean {
-  const idx = branches.findIndex(b => b.id === id);
-  if (idx === -1) return false;
-  branches.splice(idx, 1);
-  return true;
-}
+export const update = async (id: number | string, patch: BranchUpdateDTO): Promise<Branch | undefined> => {
+  try {
+    const updated = await repo.updateDocument<Branch>(COLLECTION, String(id), patch);
+    return updated ?? undefined;
+  } catch (e:any) {
+    throw new Error("DB update failed: " + (e?.message ?? e));
+  }
+};
+
+export const remove = async (id: number | string): Promise<boolean> => {
+  try {
+    return await repo.deleteDocument(COLLECTION, String(id));
+  } catch (e:any) {
+    throw new Error("DB delete failed: " + (e?.message ?? e));
+  }
+};
