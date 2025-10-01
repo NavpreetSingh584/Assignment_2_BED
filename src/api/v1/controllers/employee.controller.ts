@@ -9,6 +9,8 @@ export {
 };
 
 
+
+
 import { Request, Response } from "express";
 import * as svc from "../services/employee.service";
 import { Employee, EmployeeCreateDTO, EmployeeUpdateDTO } from "../models/employee";
@@ -17,7 +19,7 @@ import { ok, created, listOk, notFound, badRequest, noContent, serverError } fro
 /** GET /employees */
 export async function list(_req: Request, res: Response) {
   try {
-    const items = await svc.list();                 // Promise<Employee[]>
+    const items = await svc.list(); // Promise<Employee[]>
     return listOk(res, items as Employee[], "Employees retrieved", items.length);
   } catch (e: any) {
     return serverError(res, e?.message ?? "Failed to list employees");
@@ -27,10 +29,10 @@ export async function list(_req: Request, res: Response) {
 /** GET /employees/:id */
 export async function get(req: Request, res: Response) {
   try {
-    const id = req.params.id;                       // Firestore ids are strings
+    const id = req.params.id; // keep as string for Firestore
     if (!id) return badRequest(res, "Missing or invalid id parameter");
 
-    const found = await svc.getById(id);            // Promise<Employee | undefined>
+    const found = await svc.getById(id); // Promise<Employee | undefined>
     if (!found) return notFound(res, "Employee not found");
     return ok(res, found as Employee, "Employee retrieved");
   } catch (e: any) {
@@ -46,7 +48,7 @@ export async function create(req: Request, res: Response) {
       return badRequest(res, "Missing required fields");
     }
     const dto: EmployeeCreateDTO = { name, position, department, email, phone, branchId };
-    const employee = await svc.create(dto);         // Promise<Employee>
+    const employee = await svc.create(dto); // Promise<Employee>
     return created(res, employee as Employee, "Employee created");
   } catch (e: any) {
     return serverError(res, e?.message ?? "Failed to create employee");
@@ -62,7 +64,7 @@ export async function update(req: Request, res: Response) {
     const patch = { ...(req.body ?? {}) } as EmployeeUpdateDTO;
     if ((patch as any).id !== undefined) delete (patch as any).id;
 
-    const updated = await svc.update(id, patch);    // Promise<Employee | undefined>
+    const updated = await svc.update(id, patch); // Promise<Employee | undefined>
     if (!updated) return notFound(res, "Employee not found");
     return ok(res, updated as Employee, "Employee updated");
   } catch (e: any) {
@@ -76,8 +78,8 @@ export async function remove(req: Request, res: Response) {
     const id = req.params.id;
     if (!id) return badRequest(res, "Missing or invalid id parameter");
 
-    const okDel = await svc.remove(id);             // Promise<boolean>
-    if (!okDel) return notFound(res, "Employee not found");
+    const deleted = await svc.remove(id); // Promise<boolean>
+    if (!deleted) return notFound(res, "Employee not found");
     return noContent(res);
   } catch (e: any) {
     return serverError(res, e?.message ?? "Failed to delete employee");
@@ -88,12 +90,13 @@ export async function remove(req: Request, res: Response) {
 export async function listByBranch(req: Request, res: Response) {
   try {
     const branchId = req.params.branchId;
-    if (!branchId) return badRequest(res, "Missing or invalid branchId parameter");
-
+    if (!branchId || Number.isNaN(Number(branchId))) {
+      return badRequest(res, "Missing or invalid branchId parameter");
+    }
     const items = await svc.listByBranchId(Number(branchId)); // Promise<Employee[]>
     return listOk(res, items as Employee[], "Employees by branch", items.length);
   } catch (e: any) {
-    return serverError(res, e?.message ?? "Failed to list by branch");
+    return serverError(res, e?.message ?? "Failed to list employees by branch");
   }
 }
 
@@ -106,9 +109,6 @@ export async function listByDepartment(req: Request, res: Response) {
     const items = await svc.listByDepartment(department); // Promise<Employee[]>
     return listOk(res, items as Employee[], "Employees by department", items.length);
   } catch (e: any) {
-    return serverError(res, e?.message ?? "Failed to list by department");
+    return serverError(res, e?.message ?? "Failed to list employees by department");
   }
 }
-
-
-
