@@ -1,44 +1,57 @@
-import { employees } from "../../../data/employees";
-import type { Employee } from "../models/employee";
+import { Employee, EmployeeCreateDTO, EmployeeUpdateDTO } from "../models/employee";
+import * as repo from "../repositories/firestore.repository";
 
-export function list(): Employee[] {
-  return employees;
-}
+const COLLECTION = "employees";
 
-export function getById(id: number): Employee | undefined {
-  return employees.find(e => e.id === id);
-}
+export const create = async (dto: EmployeeCreateDTO): Promise<Employee> => {
+  try {
+    return await repo.createDocument<Employee>(COLLECTION, dto as any);
+  } catch (e:any) {
+    throw new Error("DB create failed: " + (e?.message ?? e));
+  }
+};
 
-export function create(payload: Omit<Employee, "id">): Employee {
-  const nextId = Math.max(0, ...employees.map(e => e.id)) + 1;
-  const emp: Employee = { id: nextId, ...payload };
-  employees.push(emp);
-  return emp;
-}
-export function update(
-  id: number,
-  patch: Partial<Omit<Employee, "id">>
-): Employee | undefined {
-  const idx = employees.findIndex(e => e.id === id);
-  if (idx === -1) return undefined;
-  employees[idx] = { ...employees[idx], ...patch, id };
-  return employees[idx];
-}
+export const list = async (): Promise<Employee[]> => {
+  try {
+    return await repo.getDocuments<Employee>(COLLECTION);
+  } catch (e:any) {
+    throw new Error("DB read failed: " + (e?.message ?? e));
+  }
+};
 
-export function remove(id: number): boolean {
-  const idx = employees.findIndex(e => e.id === id);
-  if (idx === -1) return false;
-  employees.splice(idx, 1);
-  return true;
-}
+export const getById = async (id: number | string): Promise<Employee | undefined> => {
+  try {
+    const doc = await repo.getDocumentById<Employee>(COLLECTION, String(id));
+    return doc ?? undefined;
+  } catch (e:any) {
+    throw new Error("DB read failed: " + (e?.message ?? e));
+  }
+};
 
-/** Logical queries */
-export function listByBranchId(branchId: number): Employee[] {
-  return employees.filter(e => e.branchId === branchId);
-}
+export const update = async (id: number | string, patch: EmployeeUpdateDTO): Promise<Employee | undefined> => {
+  try {
+    const updated = await repo.updateDocument<Employee>(COLLECTION, String(id), patch);
+    return updated ?? undefined;
+  } catch (e:any) {
+    throw new Error("DB update failed: " + (e?.message ?? e));
+  }
+};
 
-export function listByDepartment(department: string): Employee[] {
-  const d = department.toLowerCase();
-  return employees.filter(e => e.department.toLowerCase() === d);
-}
-export const listByBranch = listByBranchId;
+export const remove = async (id: number | string): Promise<boolean> => {
+  try {
+    return await repo.deleteDocument(COLLECTION, String(id));
+  } catch (e:any) {
+    throw new Error("DB delete failed: " + (e?.message ?? e));
+  }
+};
+
+/** Simple in-memory filter after fetch (keeps repo generic) */
+export const listByBranchId = async (branchId: number): Promise<Employee[]> => {
+  const all = await list();
+  return all.filter(e => String(e.branchId) === String(branchId));
+};
+
+export const listByDepartment = async (department: string): Promise<Employee[]> => {
+  const all = await list();
+  return all.filter(e => (e.department || "").toLowerCase() === department.toLowerCase());
+};

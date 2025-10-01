@@ -1,4 +1,5 @@
 
+
 export {
   create as createEmployee,
   list as getEmployees,
@@ -8,83 +9,106 @@ export {
 };
 
 
-
-
 import { Request, Response } from "express";
 import * as svc from "../services/employee.service";
 import { Employee, EmployeeCreateDTO, EmployeeUpdateDTO } from "../models/employee";
-import { ok, created, listOk, notFound, badRequest, noContent } from "../models/respond";
+import { ok, created, listOk, notFound, badRequest, noContent, serverError } from "../models/respond";
 
 /** GET /employees */
-export function list(_req: Request, res: Response) {
-  const employees = svc.list() as Employee[];
-  return listOk(res, employees, "Employees retrieved", employees.length);
+export async function list(_req: Request, res: Response) {
+  try {
+    const items = await svc.list();                 // Promise<Employee[]>
+    return listOk(res, items as Employee[], "Employees retrieved", items.length);
+  } catch (e: any) {
+    return serverError(res, e?.message ?? "Failed to list employees");
+  }
 }
 
 /** GET /employees/:id */
-export function get(req: Request, res: Response) {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    return badRequest(res, "Missing or invalid id parameter");
+export async function get(req: Request, res: Response) {
+  try {
+    const id = req.params.id;                       // Firestore ids are strings
+    if (!id) return badRequest(res, "Missing or invalid id parameter");
+
+    const found = await svc.getById(id);            // Promise<Employee | undefined>
+    if (!found) return notFound(res, "Employee not found");
+    return ok(res, found as Employee, "Employee retrieved");
+  } catch (e: any) {
+    return serverError(res, e?.message ?? "Failed to get employee");
   }
-  const found = svc.getById(id) as Employee | undefined;
-  if (!found) return notFound(res, "Employee not found");
-  return ok(res, found, "Employee retrieved");
 }
 
 /** POST /employees */
-export function create(req: Request, res: Response) {
-  const { name, position, department, email, phone, branchId } = req.body ?? {};
-  if (!name || !position || !department || !email || !phone || typeof branchId !== "number") {
-    return badRequest(res, "Missing required fields");
+export async function create(req: Request, res: Response) {
+  try {
+    const { name, position, department, email, phone, branchId } = req.body ?? {};
+    if (!name || !position || !department || !email || !phone || branchId === undefined) {
+      return badRequest(res, "Missing required fields");
+    }
+    const dto: EmployeeCreateDTO = { name, position, department, email, phone, branchId };
+    const employee = await svc.create(dto);         // Promise<Employee>
+    return created(res, employee as Employee, "Employee created");
+  } catch (e: any) {
+    return serverError(res, e?.message ?? "Failed to create employee");
   }
-  const employee = svc.create({ name, position, department, email, phone, branchId } as EmployeeCreateDTO);
-  return created(res, employee, "Employee created");
 }
 
 /** PUT /employees/:id */
-export function update(req: Request, res: Response) {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    return badRequest(res, "Missing or invalid id parameter");
-  }
-  const patch = { ...(req.body ?? {}) } as EmployeeUpdateDTO;
-  if ((patch as any).id !== undefined) delete (patch as any).id;
+export async function update(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    if (!id) return badRequest(res, "Missing or invalid id parameter");
 
-  const updated = svc.update(id, patch) as Employee | undefined;
-  if (!updated) return notFound(res, "Employee not found");
-  return ok(res, updated, "Employee updated");
+    const patch = { ...(req.body ?? {}) } as EmployeeUpdateDTO;
+    if ((patch as any).id !== undefined) delete (patch as any).id;
+
+    const updated = await svc.update(id, patch);    // Promise<Employee | undefined>
+    if (!updated) return notFound(res, "Employee not found");
+    return ok(res, updated as Employee, "Employee updated");
+  } catch (e: any) {
+    return serverError(res, e?.message ?? "Failed to update employee");
+  }
 }
 
 /** DELETE /employees/:id */
-export function remove(req: Request, res: Response) {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    return badRequest(res, "Missing or invalid id parameter");
+export async function remove(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+    if (!id) return badRequest(res, "Missing or invalid id parameter");
+
+    const okDel = await svc.remove(id);             // Promise<boolean>
+    if (!okDel) return notFound(res, "Employee not found");
+    return noContent(res);
+  } catch (e: any) {
+    return serverError(res, e?.message ?? "Failed to delete employee");
   }
-  const deleted = svc.remove(id);
-  if (!deleted) return notFound(res, "Employee not found");
-  return noContent(res);
 }
 
 /** GET /employees/by-branch/:branchId */
-export function listByBranch(req: Request, res: Response) {
-  const branchId = Number(req.params.branchId);
-  if (Number.isNaN(branchId)) {
-    return badRequest(res, "Missing or invalid branchId parameter");
+export async function listByBranch(req: Request, res: Response) {
+  try {
+    const branchId = req.params.branchId;
+    if (!branchId) return badRequest(res, "Missing or invalid branchId parameter");
+
+    const items = await svc.listByBranchId(Number(branchId)); // Promise<Employee[]>
+    return listOk(res, items as Employee[], "Employees by branch", items.length);
+  } catch (e: any) {
+    return serverError(res, e?.message ?? "Failed to list by branch");
   }
-  const employees = svc.listByBranchId(branchId) as Employee[];
-  return listOk(res, employees, "Employees by branch", employees.length);
 }
 
 /** GET /employees/by-department/:department */
-export function listByDepartment(req: Request, res: Response) {
-  const department = String(req.params.department ?? "").trim();
-  if (!department) {
-    return badRequest(res, "Missing department parameter");
+export async function listByDepartment(req: Request, res: Response) {
+  try {
+    const department = String(req.params.department ?? "").trim();
+    if (!department) return badRequest(res, "Missing department parameter");
+
+    const items = await svc.listByDepartment(department); // Promise<Employee[]>
+    return listOk(res, items as Employee[], "Employees by department", items.length);
+  } catch (e: any) {
+    return serverError(res, e?.message ?? "Failed to list by department");
   }
-  const employees = svc.listByDepartment(department) as Employee[];
-  return listOk(res, employees, "Employees by department", employees.length);
 }
+
 
 
