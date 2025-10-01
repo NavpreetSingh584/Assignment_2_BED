@@ -1,3 +1,13 @@
+
+export {
+  create as createBranch,
+  list as getBranches,
+  get as getBranchById,
+  update as updateBranch,
+  remove as deleteBranch,
+};
+
+
 import { Request, Response } from "express";
 import * as svc from "../services/branch.service";
 
@@ -37,3 +47,4 @@ export function remove(req: Request, res: Response) {
   if (!ok) return res.status(404).json({ message: "Branch not found" });
   res.status(204).send();
 }
+

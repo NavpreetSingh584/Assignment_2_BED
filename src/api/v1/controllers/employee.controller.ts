@@ -34,7 +34,6 @@ export function update(req: Request, res: Response) {
     return res.status(400).json({ message: "Missing or invalid id parameter" });
   }
   const patch = { ...(req.body ?? {}) };
-  // Never allow changing id via body
   if (patch.id !== undefined) delete patch.id;
 
   const updated = svc.update(id, patch);
@@ -62,7 +61,6 @@ export function listByBranch(req: Request, res: Response) {
   res.json({ data: svc.listByBranchId(branchId) });    
 }
 
-
 export function listByDepartment(req: Request, res: Response) {
   const department = String(req.params.department ?? "").trim(); 
   if (!department) {
@@ -70,3 +68,12 @@ export function listByDepartment(req: Request, res: Response) {
   }
   res.json({ data: svc.listByDepartment(department) }); 
 }
+
+/** ✅ Aliases to match your routes */
+export {
+  create as createEmployee,
+  list as getEmployees,
+  get as getEmployeeById,
+  update as updateEmployee,
+  remove as deleteEmployee,
+};

@@ -1,32 +1,22 @@
 import Joi from "joi";
 
-const phone = Joi.string()
-  .pattern(/^\+?[0-9\-\s]{7,20}$/)
-  .messages({ "string.pattern.base": "phone must be digits/spaces/dashes and 7–20 chars" });
+/** CREATE payload validation */
+export const employeeCreateSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(80).required()
+    .messages({ "string.empty": "name is required" }),
+  position: Joi.string().trim().min(2).max(60).required(),
+  department: Joi.string().trim().min(2).max(60).required(),
+  email: Joi.string().trim().email().required(),
+  phone: Joi.string().trim().pattern(/^[0-9+\-\s()]{7,20}$/).required()
+    .messages({ "string.pattern.base": "phone must be a valid phone number" }),
+  branchId: Joi.alternatives(
+    Joi.number().integer().min(1),
+    Joi.string().trim().min(1)
+  ).required()
+}).required();
 
-export const createEmployeeSchema = Joi.object({
-  name: Joi.string().min(2).max(80).required().messages({
-    "string.min": "name must be at least 2 characters",
-    "any.required": "name is required",
-  }),
-  position: Joi.string().min(2).max(80).required().messages({
-    "string.min": "position must be at least 2 characters",
-    "any.required": "position is required",
-  }),
-  department: Joi.string().min(2).max(80).required().messages({
-    "any.required": "department is required",
-  }),
-  email: Joi.string().email({ tlds: { allow: false } }).required().messages({
-    "string.email": "email must be valid",
-    "any.required": "email is required",
-  }),
-  phone: phone.optional(),
-  branchId: Joi.string().min(1).required().messages({
-    "any.required": "branchId is required",
-  }),
-});
-
-export const updateEmployeeSchema = createEmployeeSchema.fork(
-  ["name", "position", "department", "email", "branchId"],
+/** UPDATE payload validation (partial allowed) */
+export const employeeUpdateSchema = employeeCreateSchema.fork(
+  ["name", "position", "department", "email", "phone", "branchId"],
   (s) => s.optional()
 );

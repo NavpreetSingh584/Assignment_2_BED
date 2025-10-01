@@ -1,15 +1,15 @@
+// ✅ src/api/v1/routes/branch.routes.ts
 import { Router } from "express";
-import * as ctrl from "../controllers/branch.controller";
+import * as controller from "../controllers/branch.controller";
+import { validate } from "../middleware/validate";
+import { branchCreateSchema, branchUpdateSchema } from "../validation/branch.schema";
 
-export function branchRouter() {
+export const branchRouter = () => {
   const r = Router();
-
-  // CRUD
-  r.get("/", ctrl.list);
-  r.get("/:id", ctrl.get);
-  r.post("/", ctrl.create);
-  r.put("/:id", ctrl.update);
-  r.delete("/:id", ctrl.remove);
-
+  r.post("/", validate(branchCreateSchema), controller.createBranch);
+  r.get("/", controller.getBranches);
+  r.get("/:id", controller.getBranchById);
+  r.put("/:id", validate(branchUpdateSchema), controller.updateBranch);
+  r.delete("/:id", controller.deleteBranch);
   return r;
-}
+};

@@ -1,19 +1,17 @@
 import { Router } from "express";
-import * as ctrl from "../controllers/employee.controller";
+import * as controller from "../controllers/employee.controller";
+import { validate } from "../middleware/validate";
+import { employeeCreateSchema, employeeUpdateSchema } from "../validation/employee.schema";
 
-export function employeeRouter() {
+export const employeeRouter = () => {
   const r = Router();
+  r.post("/", validate(employeeCreateSchema), controller.createEmployee);
+  r.get("/", controller.getEmployees);
+  r.get("/:id", controller.getEmployeeById);
+  r.put("/:id", validate(employeeUpdateSchema), controller.updateEmployee);
+  r.delete("/:id", controller.deleteEmployee);
 
-  // CRUD
-  r.get("/", ctrl.list);
-  r.get("/:id", ctrl.get);
-  r.post("/", ctrl.create);
-  r.put("/:id", ctrl.update);
-  r.delete("/:id", ctrl.remove);
-
-  // Logical operations
-  r.get("/by-branch/:branchId", ctrl.listByBranch);
-  r.get("/by-department/:department", ctrl.listByDepartment);
-
+  // Optional filters with query validation (example)
+  // r.get("/by/branch/:branchId", validate(branchIdSchema, "params"), controller.getByBranch);
   return r;
-}
+};
