@@ -1,7 +1,8 @@
 export interface Branch {
-    id: number;
-    name: string;
-    address: string;
-    phone: string;
-  }
-          
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
