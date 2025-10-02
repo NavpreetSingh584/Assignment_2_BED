@@ -137,6 +137,18 @@ describe("Employee CRUD & logical endpoints", () => {
     }
   });
 
+  it("PUT /employees/:id -> 400 when body fails Joi (invalid type for branchId)", async () => {
+    // Use a wrong type to guarantee Joi failure even if email regex isn't enforced
+    const res = await request(app).put(`${base}/e-any`).send({
+      branchId: "not-a-number" as any,
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    // Service should NOT be invoked when validation fails
+    expect(esvc.update).not.toHaveBeenCalled();
+  });
+
   /** DELETE */
 
 
