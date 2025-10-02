@@ -1,0 +1,33 @@
+import { branchCreateSchema, branchUpdateSchema } from "../src/api/v1/validation/branch.schema";
+
+describe("validation/branch.schema", () => {
+  it("create schema → valid payload passes", () => {
+    const { error } = branchCreateSchema.validate({
+      name: "Main",
+      address: "123 River Rd",
+      phone: "204-555-2222",
+    });
+    expect(error).toBeUndefined();
+  });
+
+  it("create schema → missing required fails", () => {
+    const { error } = branchCreateSchema.validate({ name: "Main" });
+    expect(error).toBeDefined();
+  });
+
+  
+  it("create schema → invalid phone fails (wrong type/format)", () => {
+    const { error } = branchCreateSchema.validate({
+      name: "Main",
+      address: "123 River Rd",
+      phone: 12345 as any,        
+    });
+    expect(error).toBeDefined();
+  });
+  
+
+  it("update schema → partial payload passes", () => {
+    const { error } = branchUpdateSchema.validate({ phone: "204-555-9999" });
+    expect(error).toBeUndefined();
+  });
+});

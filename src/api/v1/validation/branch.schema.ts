@@ -1,4 +1,4 @@
-// ✅ src/api/v1/validation/branch.schema.ts
+//  src/api/v1/validation/branch.schema.ts
 import Joi from "joi";
 
 export const branchCreateSchema = Joi.object({
