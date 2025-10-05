@@ -1,44 +1,34 @@
-// src/config/firebaseConfig.ts
 import admin from "firebase-admin";
 import fs from "fs";
 import path from "path";
 
 function initFirebase() {
-  if (admin.apps.length) return; // already initialized
+  if (admin.apps.length) return;
 
-  // 1) Prefer Application Default Credentials via env var
-  const gac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (gac) {
-    admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
-    });
-    return;
+  const envPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  const defaultPath = path.join(process.cwd(), "firebase-service-account.json");
+  const keyPath = [envPath, defaultPath].find(p => p && fs.existsSync(p!));
+
+  if (!keyPath) {
+    throw new Error("Missing Firebase credentials file.");
   }
 
-  // 2) Fallback to local JSON at project root
-  const credPath = path.join(process.cwd(), "firebase-service-account.json");
-  if (fs.existsSync(credPath)) {
-    const serviceAccount = require(credPath);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount as any),
-    });
-    return;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const sa = require(keyPath);
 
-  // 3) If neither is present, fail loudly with instructions
-  throw new Error(
-    [
-      "Firebase credentials not found.",
-      "Set GOOGLE_APPLICATION_CREDENTIALS to an absolute path of your service account JSON, e.g.:",
-      "  export GOOGLE_APPLICATION_CREDENTIALS=\"$(pwd)/firebase-service-account.json\"",
-      "or place firebase-service-account.json at the repository root.",
-    ].join("\n")
-  );
+  // make the project id visible to all google libs
+  process.env.GOOGLE_CLOUD_PROJECT = sa.project_id;
+  process.env.GCLOUD_PROJECT = sa.project_id;
+
+  admin.initializeApp({
+    credential: admin.credential.cert(sa as admin.ServiceAccount),
+    projectId: sa.project_id,
+  });
+
+  console.log("[firebase] using:", sa.client_email, "project:", sa.project_id);
 }
 
-// Initialize once
 initFirebase();
 
-// Only access services after init
 export const db = admin.firestore();
 export const auth = admin.auth();

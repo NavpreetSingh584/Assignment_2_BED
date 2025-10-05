@@ -1,4 +1,7 @@
-// ✅ src/api/v1/routes/branch.routes.ts
+      /*
+      branch.routes.ts
+      */
+
 import { Router } from "express";
 import * as controller from "../controllers/branch.controller";
 import { validate } from "../middleware/validate";
