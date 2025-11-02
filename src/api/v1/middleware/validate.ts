@@ -7,8 +7,8 @@ export const validate =
   (schema: Joi.ObjectSchema, where: Location = "body") =>
   (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate((req as any)[where], {
-      abortEarly: false,      // collect ALL errors
-      stripUnknown: true,     // remove unexpected fields
+      abortEarly: false,      
+      stripUnknown: true,     
     });
 
     if (error) {
@@ -22,12 +22,10 @@ export const validate =
         details,
       });
     }
-    (req as any)[where] = value; // sanitized input
+
+    (req as any)[where] = value;
     next();
   };
-
-  
-// Optional helper for :id style routes
 
 export const requireIdParam = (paramName: string = "id") =>
   (req: Request, res: Response, next: NextFunction) => {
