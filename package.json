@@ -9,7 +9,8 @@
     "build": "tsc",
     "test": "jest",
     "docs:build": "ts-node scripts/generate-openapi.ts",
-    "docs:serve": "node -e \"require('http').createServer((_,r)=>r.end('Open /api/docs')).listen(8080)\""
+    "docs:serve": "node -e \"require('http').createServer((_,r)=>r.end('Open /api/docs')).listen(8080)\"",
+    "generate-docs": "npm run docs:build"
   },
   "keywords": [],
   "author": "",
