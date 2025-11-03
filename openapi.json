@@ -1,0 +1,32 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Your API",
+    "version": "1.0.0",
+    "description": "Inline-documented API with Joi components"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ItemCreate": {
+        "$ref": "#/components/schemas/ItemCreate"
+      },
+      "Item": {
+        "$ref": "#/components/schemas/Item"
+      }
+    }
+  },
+  "paths": {},
+  "tags": []
+}
