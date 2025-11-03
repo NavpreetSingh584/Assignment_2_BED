@@ -1,21 +1,18 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Your API",
+    "title": "Assignment 2 API Documentation",
     "version": "1.0.0",
-    "description": "Circular-safe OpenAPI spec built from Joi schemas",
+    "description": "Auto-generated OpenAPI documentation for Assignment 2 (Firestore + Joi Validation)",
     "license": {
-      "name": "MIT"
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
     }
   },
   "servers": [
     {
-      "url": "https://your-api-domain.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
+      "url": "http://localhost:3000/api/v1",
+      "description": "Local Development Server"
     }
   ],
   "components": {
@@ -40,7 +37,11 @@
             "type": "string",
             "example": "Winnipeg"
           }
-        }
+        },
+        "required": [
+          "name",
+          "location"
+        ]
       },
       "BranchUpdate": {
         "type": "object",
