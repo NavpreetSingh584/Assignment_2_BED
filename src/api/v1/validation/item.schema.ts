@@ -1,5 +1,4 @@
-import Joi from 'joi';
-
+import * as Joi from "joi";
 /**
  * Use meta + description to improve joi-to-swagger output.
  */
