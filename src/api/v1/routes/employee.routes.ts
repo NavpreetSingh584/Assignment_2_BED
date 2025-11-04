@@ -7,7 +7,7 @@ import { validate } from "../middleware/validate";
 import { employeeCreateSchema, employeeUpdateSchema } from "../validation/employee.schema";
 
 export const employeeRouter = () => {
-  const r = Router();
+  const router = Router();
 
   /**
    * @openapi
@@ -25,7 +25,7 @@ export const employeeRouter = () => {
    *       201:
    *         description: Employee created successfully
    */
-  r.post("/", validate(employeeCreateSchema), controller.createEmployee);
+  router.post("/", validate(employeeCreateSchema), controller.createEmployee);
 
   /**
    * @openapi
@@ -37,7 +37,7 @@ export const employeeRouter = () => {
    *       200:
    *         description: List of employees
    */
-  r.get("/", controller.getEmployees);
+  router.get("/", controller.getEmployees);
 
   /**
    * @openapi
@@ -56,7 +56,7 @@ export const employeeRouter = () => {
    *       200:
    *         description: List of employees for the specified branch
    */
-  r.get("/by-branch/:branchId", controller.listByBranch);
+  router.get("/by-branch/:branchId", controller.listByBranch);
 
   /**
    * @openapi
@@ -75,7 +75,7 @@ export const employeeRouter = () => {
    *       200:
    *         description: List of employees in the specified department
    */
-  r.get("/by-department/:department", controller.listByDepartment);
+  router.get("/by-department/:department", controller.listByDepartment);
 
   /**
    * @openapi
@@ -96,7 +96,7 @@ export const employeeRouter = () => {
    *       404:
    *         description: Employee not found
    */
-  r.get("/:id", controller.getEmployeeById);
+  router.get("/:id", controller.getEmployeeById);
 
   /**
    * @openapi
@@ -123,7 +123,7 @@ export const employeeRouter = () => {
    *       400:
    *         description: Invalid request data
    */
-  r.put("/:id", validate(employeeUpdateSchema), controller.updateEmployee);
+  router.put("/:id", validate(employeeUpdateSchema), controller.updateEmployee);
 
   /**
    * @openapi
@@ -144,7 +144,7 @@ export const employeeRouter = () => {
    *       404:
    *         description: Employee not found
    */
-  r.delete("/:id", controller.deleteEmployee);
+  router.delete("/:id", controller.deleteEmployee);
 
-  return r;
+  return router;
 };

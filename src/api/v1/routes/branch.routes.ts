@@ -7,7 +7,7 @@ import { validate } from "../middleware/validate";
 import { branchCreateSchema, branchUpdateSchema } from "../validation/branch.schema";
 
 export const branchRouter = () => {
-  const r = Router();
+  const router = Router();
 
   /**
    * @openapi
@@ -25,7 +25,7 @@ export const branchRouter = () => {
    *       201:
    *         description: Branch created successfully
    */
-  r.post("/", validate(branchCreateSchema), controller.createBranch);
+  router.post("/", validate(branchCreateSchema), controller.createBranch);
 
   /**
    * @openapi
@@ -37,7 +37,7 @@ export const branchRouter = () => {
    *       200:
    *         description: List of branches
    */
-  r.get("/", controller.getBranches);
+  router.get("/", controller.getBranches);
 
   /**
    * @openapi
@@ -58,7 +58,7 @@ export const branchRouter = () => {
    *       404:
    *         description: Branch not found
    */
-  r.get("/:id", controller.getBranchById);
+  router.get("/:id", controller.getBranchById);
 
   /**
    * @openapi
@@ -85,7 +85,7 @@ export const branchRouter = () => {
    *       400:
    *         description: Invalid request
    */
-  r.put("/:id", validate(branchUpdateSchema), controller.updateBranch);
+  router.put("/:id", validate(branchUpdateSchema), controller.updateBranch);
 
   /**
    * @openapi
@@ -106,7 +106,7 @@ export const branchRouter = () => {
    *       404:
    *         description: Branch not found
    */
-  r.delete("/:id", controller.deleteBranch);
+  router.delete("/:id", controller.deleteBranch);
 
-  return r;
+  return router;
 };
