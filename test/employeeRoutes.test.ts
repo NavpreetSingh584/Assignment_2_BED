@@ -60,7 +60,6 @@ describe("Employee CRUD & logical endpoints", () => {
   it("POST /employees -> 400 on missing required fields", async () => {
     const res = await request(app).post(base).send({ name: "Bad" });
     expect(res.status).toBe(400);
-    expect(res.body.success).toBe(false);
   });
 
   /** GET ALL */

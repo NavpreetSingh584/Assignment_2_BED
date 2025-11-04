@@ -2,4 +2,3 @@ node_modules/
 dist/
 firebase-service-account.json/
 .env
-.env.*.local
